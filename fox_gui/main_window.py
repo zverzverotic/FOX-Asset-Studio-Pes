@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 
 from fox_core.parser import FoxParser
 from pathlib import Path
+from fox_core.exporter import FoxExporter
 
 from PySide6.QtGui import QPixmap
 
@@ -21,6 +22,9 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.parser = FoxParser()
+        self.exporter = FoxExporter()
+
+self.current_file = None
         self.asset = None
         self.current_template = None
 self.texture_folder = None
@@ -45,11 +49,13 @@ self.texture_folder = None
         left = QVBoxLayout()
 
         self.openButton = QPushButton("Open JSON")
+        self.saveButton = QPushButton("Save JSON")
 
         self.templateList = QListWidget()
 
-        left.addWidget(self.openButton)
-        left.addWidget(self.templateList)
+       left.addWidget(self.openButton)
+left.addWidget(self.saveButton)
+left.addWidget(self.templateList)
 
         #
         # Right panel
@@ -83,6 +89,9 @@ self.preview = UVPreview()
         self.templateList.currentTextChanged.connect(
             self.template_changed
         )
+self.saveButton.clicked.connect(
+    self.save_json
+)
 
     def open_json(self):
 
@@ -102,6 +111,7 @@ self.preview = UVPreview()
             return
 
         self.asset = self.parser.load(filename)
+        self.current_file = filename
         folder = QFileDialog.getExistingDirectory(
 
     self,
