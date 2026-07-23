@@ -57,7 +57,9 @@ self.texture_folder = None
 
         right = QVBoxLayout()
 
-        self.preview = QLabel("Texture Preview")
+        from uv_preview import UVPreview
+
+self.preview = UVPreview()
 
         self.preview.setMinimumSize(700, 500)
 
@@ -162,19 +164,12 @@ Vertices:
 
     if png.exists():
 
-        pix = QPixmap(str(png))
+      self.preview.set_preview(
+    str(png),
+    element.vertices
+)
 
-        self.preview.setPixmap(
-
-            pix.scaled(
-
-                self.preview.size(),
-
-                aspectMode=1
-
-            )
-
-        )
+        
 
     else:
 
