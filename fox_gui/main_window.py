@@ -10,7 +10,9 @@ from PySide6.QtWidgets import (
 )
 
 from fox_core.parser import FoxParser
+from pathlib import Path
 
+from PySide6.QtGui import QPixmap
 
 class MainWindow(QMainWindow):
 
@@ -20,6 +22,8 @@ class MainWindow(QMainWindow):
 
         self.parser = FoxParser()
         self.asset = None
+        self.current_template = None
+self.texture_folder = None
 
         self.setWindowTitle("FOX Asset Studio")
         self.resize(1200, 700)
@@ -96,6 +100,17 @@ class MainWindow(QMainWindow):
             return
 
         self.asset = self.parser.load(filename)
+        folder = QFileDialog.getExistingDirectory(
+
+    self,
+
+    "Select Texture Folder"
+
+)
+
+if folder:
+
+    self.texture_folder = folder
 
         self.templateList.clear()
 
@@ -105,20 +120,65 @@ class MainWindow(QMainWindow):
 
     def template_changed(self, name):
 
-        if self.asset is None:
-            return
+    if self.asset is None:
+        return
 
-        template = self.asset.templates[name]
+    self.current_template = self.asset.templates[name]
 
-        self.info.setText(
+    element = self.current_template.elements[0]
 
-            f"""
-Template:
+    texture_path = self.asset.textures[element.texture_index]
+
+    texture_name = Path(texture_path).stem
+
+    self.info.setText(
+
+f"""Template
 
 {name}
 
-Elements:
+Material:
+{element.material}
 
-{len(template.elements)}
+Texture Index:
+{element.texture_index}
+
+Texture:
+{texture_name}
+
+Vertices:
+{len(element.vertices)}
 """
+    )
+
+    #
+    # Preview PNG ako postoji
+    #
+
+    if self.texture_folder is None:
+        return
+
+    png = Path(self.texture_folder) / (texture_name + ".png")
+
+    if png.exists():
+
+        pix = QPixmap(str(png))
+
+        self.preview.setPixmap(
+
+            pix.scaled(
+
+                self.preview.size(),
+
+                aspectMode=1
+
+            )
+
+        )
+
+    else:
+
+        self.preview.setText(
+
+            "Preview not found"
         )
